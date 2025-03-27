@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>🚀 NASA Günün Fotoğrafı</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="stars"></div> <!-- Yıldızlı arka plan -->
+
+  <h1>🚀 NASA Günün Fotoğrafı</h1>
+
+  <div class="photo-box">
+    <p id="date">Yükleniyor...</p>
+    <h2 id="title"></h2>
+    <img id="image" src="" alt="Günün Fotoğrafı" />
+    <p id="description"></p>
+  </div>
+
+  <button onclick="getPhoto()">🔁 Yeni Fotoğraf Göster</button>
+
+  <script>
+    function getRandomDate() {
+      const start = new Date(2015, 0, 1); // 1 Ocak 2015
+      const end = new Date(); // bugün
+      const random = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+      const yyyy = random.getFullYear();
+      const mm = String(random.getMonth() + 1).padStart(2, '0');
+      const dd = String(random.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    async function translateToTurkish(text) {
+      const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=tr&dt=t&q=${encodeURIComponent(text)}`);
+      const data = await res.json();
+      return data[0][0][0]; // Çeviri sonucu
+    }
+
+    async function getPhoto() {
+      const date = getRandomDate();
+      const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${date}`);
+      const data = await res.json();
+
+      document.getElementById('date').innerText = `📅 Tarih: ${data.date}`;
+      document.getElementById('title').innerText = `🌌 Başlık: ${data.title}`;
+      document.getElementById('image').src = data.url;
+
+      // Açıklamayı Türkçeye çevir ve ekrana yaz:
+      const translated = await translateToTurkish(data.explanation);
+      document.getElementById('description').innerText = `📖 Açıklama: ${translated}`;
+    }
+
+    window.onload = getPhoto;
+
+    // Mouse hareketiyle kutuyu oynat
+    document.addEventListener('mousemove', e => {
+      const box = document.querySelector('.photo-box');
+      const x = (e.clientX / window.innerWidth - 0.5) * 20;
+      const y = (e.clientY / window.innerHeight - 0.5) * 20;
+      box.style.transform = `translate(${x}px, ${y}px)`;
+    });
+  </script>
+</body>
+</html>
