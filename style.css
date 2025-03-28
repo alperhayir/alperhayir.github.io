@@ -1,12 +1,13 @@
 body {
+    font-family: Arial, sans-serif;
     margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #0b0c10;
-    color: #f5f5f5;
-    text-align: center;
-    overflow-x: hidden;
-    transition: background 0.5s, color 0.5s;
+    padding: 20px;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  body.dark {
+    background-color: #0b0c2a;
+    color: #fff;
   }
   
   body.light {
@@ -14,73 +15,109 @@ body {
     color: #111;
   }
   
-  .stars {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    background: transparent url('https://i.gifer.com/7VE.gif') repeat;
-    background-size: cover;
-    z-index: -1;
-    opacity: 0.15;
+  h1 {
+    text-align: center;
+    color: #ffd700;
   }
   
-  .theme-toggle {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: #45a29e;
-    border: none;
-    color: white;
-    padding: 8px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  
-  .photo-box {
-    background: rgba(31, 40, 51, 0.85);
-    padding: 20px;
-    border-radius: 10px;
-    margin: 20px auto;
-    width: 85%;
-    max-width: 800px;
-    box-shadow: 0 0 20px #66fcf1;
-    transition: transform 0.2s ease;
-  }
-  
-  body.light .photo-box {
-    background: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 0 20px #999;
-  }
-  
-  img {
-    max-width: 100%;
-    border-radius: 10px;
-    margin-top: 10px;
-    box-shadow: 0 0 10px #000;
+  .top-buttons {
+    text-align: center;
+    margin-bottom: 20px;
   }
   
   button {
-    background-color: #45a29e;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    margin: 10px;
+    background-color: #ffd700;
+    color: #0b0c2a;
+    padding: 10px 20px;
     font-size: 16px;
-    border-radius: 6px;
+    margin: 5px;
+    border: none;
+    border-radius: 8px;
     cursor: pointer;
-    transition: 0.3s;
+    transition: background-color 0.3s;
   }
   
   button:hover {
-    background-color: #66fcf1;
-    color: black;
+    background-color: #e5c100;
   }
   
-  .link-btn {
-    display: inline-block;
-    margin-top: 10px;
+  img {
+    max-width: 90%;
+    margin: 20px auto;
+    border-radius: 10px;
+    box-shadow: 0 0 15px #ffd700;
+    display: block;
+  }
+  
+  .desc {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: left;
+    background: rgba(29, 30, 66, 0.9);
+    padding: 15px;
+    border-radius: 10px;
+  }
+  
+  body.light .desc {
+    background: rgba(255, 255, 255, 0.9);
+  }
+  
+  a {
+    color: #ffd700;
     text-decoration: none;
-    color: #66fcf1;
-    font-size: 15px;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Açıklama kartı */
+  .explanation-card {
+    margin-top: 15px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+  }
+  
+  .toggle-explanation {
+    background-color: #ffd700;
+    color: #000;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  
+  .explanation-text {
+    display: none;
+    transition: all 0.3s ease;
+  }
+  
+ 
+  .history-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .history-item {
+    width: 120px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #ffd700;
+    cursor: pointer;
+    transition: transform 0.3s;
+  }
+  
+  .history-item:hover {
+    transform: scale(1.05);
+  }
+  
+  .history-item img {
+    width: 100%;
+    display: block;
   }
   
