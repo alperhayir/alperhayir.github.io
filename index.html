@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>🚀 NASA Günün Fotoğrafı</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="stars"></div> <!-- Yıldızlı arka plan -->
-
+  <div class="stars"></div>
+  <button class="theme-toggle" onclick="toggleTheme()">🌚 Tema Değiştir</button>
   <h1>🚀 NASA Günün Fotoğrafı</h1>
 
   <div class="photo-box">
@@ -15,14 +15,37 @@
     <h2 id="title"></h2>
     <img id="image" src="" alt="Günün Fotoğrafı" />
     <p id="description"></p>
+    <button id="toggleDescription" style="display:none" onclick="toggleFullText()">…devamını oku</button>
+    <br>
+    <a id="wikipediaLink" class="link-btn" target="_blank"></a>
+    <br>
+    <a id="sourceLink" class="link-btn" target="_blank"></a>
   </div>
 
-  <button onclick="getPhoto()">🔁 Yeni Fotoğraf Göster</button>
+  <button onclick="getPhoto()">🔄 Yeni Fotoğraf Göster</button>
 
   <script>
+    let fullExplanation = '';
+    let shortExplanation = '';
+    let isExpanded = false;
+    let originalText = '';
+    let translatedText = '';
+
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+    }
+
+    function toggleFullText() {
+      isExpanded = !isExpanded;
+      const desc = document.getElementById('description');
+      const toggleBtn = document.getElementById('toggleDescription');
+      desc.innerText = isExpanded ? translatedText : shortExplanation;
+      toggleBtn.innerText = isExpanded ? 'Kısalt' : '...devamını oku';
+    }
+
     function getRandomDate() {
-      const start = new Date(2015, 0, 1); // 1 Ocak 2015
-      const end = new Date(); // bugün
+      const start = new Date(2015, 0, 1);
+      const end = new Date();
       const random = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
       const yyyy = random.getFullYear();
       const mm = String(random.getMonth() + 1).padStart(2, '0');
@@ -33,7 +56,7 @@
     async function translateToTurkish(text) {
       const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=tr&dt=t&q=${encodeURIComponent(text)}`);
       const data = await res.json();
-      return data[0][0][0]; // Çeviri sonucu
+      return data[0][0][0];
     }
 
     async function getPhoto() {
@@ -45,20 +68,25 @@
       document.getElementById('title').innerText = `🌌 Başlık: ${data.title}`;
       document.getElementById('image').src = data.url;
 
-      // Açıklamayı Türkçeye çevir ve ekrana yaz:
-      const translated = await translateToTurkish(data.explanation);
-      document.getElementById('description').innerText = `📖 Açıklama: ${translated}`;
+      originalText = data.explanation;
+      translatedText = await translateToTurkish(originalText);
+
+      shortExplanation = translatedText.length > 300 ? translatedText.slice(0, 300) + '...' : translatedText;
+      document.getElementById('description').innerText = shortExplanation;
+      document.getElementById('toggleDescription').style.display = translatedText.length > 300 ? 'inline-block' : 'none';
+
+      document.getElementById('wikipediaLink').href = `https://tr.wikipedia.org/wiki/${encodeURIComponent(data.title)}`;
+      document.getElementById('wikipediaLink').innerText = '🔍 Bu konu hakkında bilgi al';
+
+      if (data.copyright) {
+        document.getElementById('sourceLink').href = data.hdurl || data.url;
+        document.getElementById('sourceLink').innerText = `📷 Kaynak: ${data.copyright}`;
+      } else {
+        document.getElementById('sourceLink').innerText = '';
+      }
     }
 
     window.onload = getPhoto;
-
-    // Mouse hareketiyle kutuyu oynat
-    document.addEventListener('mousemove', e => {
-      const box = document.querySelector('.photo-box');
-      const x = (e.clientX / window.innerWidth - 0.5) * 20;
-      const y = (e.clientY / window.innerHeight - 0.5) * 20;
-      box.style.transform = `translate(${x}px, ${y}px)`;
-    });
   </script>
 </body>
 </html>
