@@ -1,92 +1,120 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>🚀 Rastgele Bir NASA Gözlemi</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NASA Günün Fotoğrafı</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <div class="stars"></div>
-  <button class="theme-toggle" onclick="toggleTheme()">🌚 Tema Değiştir</button>
+<body class="dark">
   <h1>🚀 NASA Günün Fotoğrafı</h1>
 
-  <div class="photo-box">
-    <p id="date">Yükleniyor...</p>
-    <h2 id="title"></h2>
-    <img id="image" src="" alt="Günün Fotoğrafı" />
-    <p id="description"></p>
-    <button id="toggleDescription" style="display:none" onclick="toggleFullText()">…devamını oku</button>
-    <br>
-    <a id="wikipediaLink" class="link-btn" target="_blank"></a>
-    <br>
-    <a id="sourceLink" class="link-btn" target="_blank"></a>
+  <div class="top-buttons">
+    <button id="new-photo">🔄 Yeni Fotoğraf Getir</button>
+    <button id="toggle-theme">🌞 Tema: Aydınlık</button>
   </div>
 
-  <button onclick="getPhoto()">🔄 Yeni Fotoğraf Göster</button>
+  <div id="content"></div>
+
+  <h3 style="text-align:center;">📸 Son Görüntülenenler</h3>
+  <div id="history" class="history-list"></div>
 
   <script>
-    let fullExplanation = '';
-    let shortExplanation = '';
-    let isExpanded = false;
-    let originalText = '';
-    let translatedText = '';
+    const apiKey = "S5pp4mNmORNl653qgxmjch4Nx1nMhE4p5YcAXHYv";
+    const apiBaseURL = `https://api.nasa.gov/planetary/apod?api_key=${apiKey}`;
 
-    function toggleTheme() {
-      document.body.classList.toggle('light');
-    }
-
-    function toggleFullText() {
-      isExpanded = !isExpanded;
-      const desc = document.getElementById('description');
-      const toggleBtn = document.getElementById('toggleDescription');
-      desc.innerText = isExpanded ? translatedText : shortExplanation;
-      toggleBtn.innerText = isExpanded ? 'Kısalt' : '...devamını oku';
-    }
-
-    function getRandomDate() {
-      const start = new Date(2015, 0, 1);
-      const end = new Date();
-      const random = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-      const yyyy = random.getFullYear();
-      const mm = String(random.getMonth() + 1).padStart(2, '0');
-      const dd = String(random.getDate()).padStart(2, '0');
-      return `${yyyy}-${mm}-${dd}`;
+    function getRandomDate(start, end) {
+      const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+      return date.toISOString().split('T')[0];
     }
 
     async function translateToTurkish(text) {
-      const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=tr&dt=t&q=${encodeURIComponent(text)}`);
+      const res = await fetch(
+        `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=tr&dt=t&q=${encodeURIComponent(text)}`
+      );
       const data = await res.json();
       return data[0][0][0];
     }
 
-    async function getPhoto() {
-      const date = getRandomDate();
-      const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&date=${date}`);
-      const data = await res.json();
+    function updateHistory(data) {
+      const historyContainer = document.getElementById("history");
 
-      document.getElementById('date').innerText = `📅 Tarih: ${data.date}`;
-      document.getElementById('title').innerText = `🌌 Başlık: ${data.title}`;
-      document.getElementById('image').src = data.url;
+      const item = document.createElement("div");
+      item.className = "history-item";
+      item.innerHTML = `<img src="${data.url}" alt="${data.title}" title="${data.title}">`;
 
-      originalText = data.explanation;
-      translatedText = await translateToTurkish(originalText);
+      item.onclick = async () => {
+        const translated = await translateToTurkish(data.explanation);
+        const wikiSearchLink = `https://tr.wikipedia.org/w/index.php?search=${encodeURIComponent(data.title)}`;
+        showContent(data, translated, wikiSearchLink);
+      };
 
-      shortExplanation = translatedText.length > 300 ? translatedText.slice(0, 300) + '...' : translatedText;
-      document.getElementById('description').innerText = shortExplanation;
-      document.getElementById('toggleDescription').style.display = translatedText.length > 300 ? 'inline-block' : 'none';
-
-      document.getElementById('wikipediaLink').href = `https://tr.wikipedia.org/wiki/${encodeURIComponent(data.title)}`;
-      document.getElementById('wikipediaLink').innerText = '🔍 Bu konu hakkında bilgi al';
-
-      if (data.copyright) {
-        document.getElementById('sourceLink').href = data.hdurl || data.url;
-        document.getElementById('sourceLink').innerText = `📷 Kaynak: ${data.copyright}`;
-      } else {
-        document.getElementById('sourceLink').innerText = '';
+      historyContainer.prepend(item);
+      if (historyContainer.childElementCount > 5) {
+        historyContainer.lastElementChild.remove();
       }
     }
 
-    window.onload = getPhoto;
+    function showContent(data, translatedExplanation, wikiSearchLink) {
+      const content = `
+        <h2 style="text-align:center;">${data.title}</h2>
+        <img src="${data.url}" alt="${data.title}" />
+        <div class="desc" id="info-box">
+          <p style="text-align:center;"><strong>Tarih:</strong> ${data.date}</p>
+          <p style="text-align:center;"><a href="${data.hdurl || data.url}" target="_blank">🔍 Fotoğrafı HD görüntüle</a></p>
+          <div class="explanation-card" id="explanation-card">
+            <button class="toggle-explanation" id="toggle-explanation">📄 Açıklamayı Göster</button>
+            <div class="explanation-text" id="explanation-text">
+              <p><strong>Açıklama (TR):</strong> ${translatedExplanation}</p>
+            </div>
+          </div>
+          <p style="text-align:center;"><a href="${wikiSearchLink}" target="_blank">📚 İlgili Wikipedia araması</a></p>
+        </div>
+      `;
+      document.getElementById("content").innerHTML = content;
+
+      const toggleBtn = document.getElementById("toggle-explanation");
+      const textBox = document.getElementById("explanation-text");
+
+      toggleBtn.addEventListener("click", () => {
+        const isVisible = textBox.style.display === "block";
+        textBox.style.display = isVisible ? "none" : "block";
+        toggleBtn.textContent = isVisible ? "📄 Açıklamayı Göster" : "📄 Açıklamayı Gizle";
+      });
+    }
+
+    const fetchPhoto = async () => {
+      document.getElementById("content").innerHTML = "";
+
+      const randomDate = getRandomDate(new Date(1995, 5, 16), new Date());
+      const apiURL = `${apiBaseURL}&date=${randomDate}`;
+
+      try {
+        const res = await fetch(apiURL);
+        const data = await res.json();
+        const translatedExplanation = await translateToTurkish(data.explanation);
+        const wikiSearchLink = `https://tr.wikipedia.org/w/index.php?search=${encodeURIComponent(data.title)}`;
+
+        showContent(data, translatedExplanation, wikiSearchLink);
+        updateHistory(data);
+      } catch (err) {
+        console.error("Hata:", err);
+      }
+    };
+
+    fetchPhoto();
+    document.getElementById("new-photo").addEventListener("click", fetchPhoto);
+
+    document.getElementById("toggle-theme").addEventListener("click", () => {
+      const body = document.body;
+      body.classList.toggle("light");
+      body.classList.toggle("dark");
+
+      const themeBtn = document.getElementById("toggle-theme");
+      themeBtn.textContent = body.classList.contains("light")
+        ? "🌙 Tema: Karanlık"
+        : "🌞 Tema: Aydınlık";
+    });
   </script>
 </body>
 </html>
